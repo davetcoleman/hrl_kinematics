@@ -80,7 +80,7 @@ void Kinematics::initialize()
   if (!loadKDLModel())
     throw Kinematics::InitFailed("Could not load KDL model!");
 
-  ROS_INFO("Kinematics initialized");
+  ROS_DEBUG_STREAM_NAMED("initialize","HRL kinematics ready");
 }
 
 bool Kinematics::loadKDLModel() 
