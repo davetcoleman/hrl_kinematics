@@ -39,6 +39,7 @@
 #include <geometry_msgs/PolygonStamped.h>
 
 #include <vector>
+#include <boost/thread/mutex.hpp>
 
 namespace hrl_kinematics {
 
@@ -115,6 +116,9 @@ protected:
 
   //Convex Hull scaling factor
   double foot_polygon_scale_;
+
+  // Prevent qhull from having threading errors
+  static boost::mutex mutex_;
 };
 
 // Create boost pointers for this class

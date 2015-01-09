@@ -38,6 +38,9 @@ using boost::shared_ptr;
 
 namespace hrl_kinematics {
 
+// Define class static mutex
+boost::mutex TestStability::mutex_;
+
 TestStability::TestStability(std::string rfoot_mesh_link_name, 
                              std::string root_link_name, std::string rfoot_link_name, std::string lfoot_link_name, 
                              const boost::shared_ptr<const urdf::ModelInterface>& urdf_model,
@@ -151,7 +154,10 @@ visualization_msgs::Marker TestStability::getCOMMarker() const{
   return com_marker;
 }
 
-std::vector<tf::Point> TestStability::convexHull(const std::vector<tf::Point>& points) const{
+std::vector<tf::Point> TestStability::convexHull(const std::vector<tf::Point>& points) const
+{
+  boost::mutex::scoped_lock scoped_lock(mutex_);
+
   std::vector<tf::Point> hull;
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_points(new pcl::PointCloud<pcl::PointXYZ>);
@@ -170,6 +176,9 @@ std::vector<tf::Point> TestStability::convexHull(const std::vector<tf::Point>& p
   chull.setDimension(2);
   chull.setInputCloud(pcl_points);
   std::vector<pcl::Vertices> polygons;
+
+  // Compute the convex hull
+  // Note: this is not thread-safe, see http://www.qhull.org/html/qh-code.htm
   chull.reconstruct(chull_points, polygons);
 
   if (polygons.size() == 0){
@@ -190,7 +199,8 @@ std::vector<tf::Point> TestStability::convexHull(const std::vector<tf::Point>& p
   return hull;
 }
 
-bool TestStability::pointInConvexHull(const tf::Point& point, const std::vector<tf::Point>& polygon) const{
+bool TestStability::pointInConvexHull(const tf::Point& point, const std::vector<tf::Point>& polygon) const
+{
   assert(polygon.size() >=3);
   int positive_direction = 0;
   for (unsigned i = 0; i < polygon.size(); ++i){

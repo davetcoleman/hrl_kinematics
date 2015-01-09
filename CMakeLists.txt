@@ -14,7 +14,7 @@ set(PACKAGE_DEPENDENCIES
   
 
 find_package(catkin REQUIRED COMPONENTS ${PACKAGE_DEPENDENCIES})
-
+find_package(Boost REQUIRED thread)
 find_package(PCL REQUIRED QUIET COMPONENTS common surface)
 
 
